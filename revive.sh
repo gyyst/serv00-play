@@ -10,8 +10,7 @@ LOGININFO=${LOGININFO:-N}
 export TELEGRAM_TOKEN TELEGRAM_USERID BUTTON_URL
 
 # 使用 jq 提取 JSON 数组，并将其加载为 Bash 数组
-json_data=$(curl -s -f "${HOSTS_URL}") || { echo "Failed to fetch HOSTS_URL" >&2; exit 1; }
-hosts_info=($(echo "$json_data" | jq -c ".accounts[]"))  # 关键修改点：.info[] -> .accounts[]
+hosts_info=($(curl -s "${HOSTS_URL}" | jq -c ".accounts[]"))  # 这里已修改为从 URL 获取
 summary=""
 for info in "${hosts_info[@]}"; do
   user=$(echo "$info" | jq -r ".username")
