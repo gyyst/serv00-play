@@ -14,6 +14,7 @@ export TELEGRAM_TOKEN TELEGRAM_USERID BUTTON_URL
 json_data=$(curl -s -f "${HOSTS_URL}") || { echo "Failed to fetch HOSTS_URL" >&2; exit 1; }
 hosts_info=($(echo "$json_data" | jq -c ".accounts[]"))  # 关键修改点：.info[] -> .accounts[]
 summary=""
+echo 1
 for info in "${hosts_info[@]}"; do
   echo $info
   user=$(echo $info | jq -r ".username")
