@@ -10,13 +10,16 @@ LOGININFO=${LOGININFO:-N}
 export TELEGRAM_TOKEN TELEGRAM_USERID BUTTON_URL
 
 # 使用 jq 提取 JSON 数组，并将其加载为 Bash 数组
-hosts_info=($(curl -s "${HOSTS_URL}" | jq -c ".info[]"))
+json_data=$(curl -s -f "${HOSTS_URL}") || { echo "Failed to fetch HOSTS_URL" >&2; exit 1; }
+hosts_info=($(echo "$json_data" | jq -c ".accounts[]"))  # 关键修改点：.info[] -> .accounts[]
 summary=""
 for info in "${hosts_info[@]}"; do
-  user=$(echo $info | jq -r ".username")
-  host=$(echo $info | jq -r ".host")
-  port=$(echo $info | jq -r ".port")
-  pass=$(echo $info | jq -r ".password")
+  user=$(echo "$info" | jq -r ".username")
+  pass=$(echo "$info" | jq -r ".password")
+  panelnum=$(echo "$info" | jq -r ".panelnum")
+  # 如果 host/port 未直接提供，可根据需要构造（示例逻辑）
+  host="s${panelnum}.serv00.com"  # 示例：根据 panelnum 动态生成 host
+  port=22                              # 示例：固定 SSH 端口
 
   if [[ "$AUTOUPDATE" == "Y" ]]; then
     script="/home/$user/serv00-play/keepalive.sh autoupdate ${SENDTYPE} \"${TELEGRAM_TOKEN}\" \"${TELEGRAM_USERID}\" \"${WXSENDKEY}\" \"${BUTTON_URL}\" \"${pass}\""
